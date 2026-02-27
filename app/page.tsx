@@ -1,57 +1,44 @@
+// app/page.tsx
 "use client";
-import { useState, useCallback } from "react";
-import {
-  ReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
-  addEdge,
-  NodeChange,
-  EdgeChange,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
 
-const initialNodes = [
-  { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-];
-const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
+import { useMemo, useState } from "react";
+import { hierarchy, pack } from "d3-hierarchy";
+import { careerData, type TreeNode } from "@/data/careers";
 
-export default function App() {
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+import Breadcrumb from "@/components/Breadcrumb";
+import CareerMap from "@/components/CareerMap";
 
-  const onNodesChange = useCallback(
-    (
-      changes: NodeChange<{
-        id: string;
-        position: { x: number; y: number };
-        data: { label: string };
-      }>[],
-    ) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
-    [],
-  );
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange<{ id: string; source: string; target: string }>[]) =>
-      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
-    [],
-  );
-  const onConnect = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (params: any) =>
-      setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
-    [],
-  );
+const SIZE = 928;
+
+export default function Page() {
+  // Compute circle packing layout once
+  const root = useMemo(() => {
+    const r = hierarchy(careerData)
+      .sum((d) => d.value ?? 0)
+      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+
+    return pack<TreeNode>()
+      .size([SIZE, SIZE])
+      .padding((d) => [25, 14, 8, 4, 2][Math.min(d.depth, 4)])(r);
+  }, []);
+
+  const [focus, setFocus] = useState(root);
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-      />
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        background: "#0f0f1a",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        fontFamily: "system-ui, sans-serif",
+      }}
+    >
+      <Breadcrumb focus={focus} setFocus={setFocus} />
+
+      <CareerMap root={root} focus={focus} setFocus={setFocus} size={SIZE} />
     </div>
   );
 }
