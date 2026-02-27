@@ -48,22 +48,27 @@ The codebase is organized to separate the complex SVG rendering from the data st
 ```text
 career-universe/
 ├── app/
-│   └── page.tsx              # Main layout and state controller
+│   └── globals.css
+│   └── layout.tsx
+│   └── page.tsx
 ├── components/
-│   ├── CareerMap.tsx         # D3.js Zoomable Circle Packing SVG
-│   └── Header.tsx            # shadcn top navigation bar
-├── data/                     # The JSON-like graph/tree database
-│   ├── index.ts              # Root compiler
-│   ├── types.ts              # TypeScript interfaces
-│   └── domains/              # Individual modular data files
-│       ├── science.ts
+│   ├── career-map/
+│   ├── theme/
+│   ├── ui/
+├── data/
+│   ├── index.ts
+│   ├── types.ts
+│   └── domains/
+│       ├── arts.ts
+│       ├── business.ts
 │       ├── engineering.ts
 │       └── ...
-└── ...
+└── hooks/
+└── lib/
 ```
 
 ## 🗺️ Future Roadmap
 
 - **Graph Edges**: Implement a side inspector panel to reveal cross-disciplinary links (e.g., showing how "Bioinformatics" bridges Biology and Computer Science).
-- **Career Details**: Add salary data, required degrees, and descriptions to the leaf nodes.
+- **Career Details**: Add salary data, required degrees, and descriptions to the tsleaf nodes.
 - **Search Functionality**: Add a command palette to quickly locate and zoom to specific careers.
