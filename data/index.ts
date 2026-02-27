@@ -7,6 +7,8 @@ import { technologyDomain } from "./domains/technology";
 import { artsDomain } from "./domains/arts";
 import { businessDomain } from "./domains/business";
 import { healthcareDomain } from "./domains/healthcare";
+import { educationDomain } from "./domains/education";
+import { lawDomain } from "./domains/law";
 
 export const careerData: TreeNode = {
   id: "root",
@@ -18,6 +20,8 @@ export const careerData: TreeNode = {
     artsDomain,
     businessDomain,
     healthcareDomain,
+    educationDomain,
+    lawDomain,
   ],
 };
 

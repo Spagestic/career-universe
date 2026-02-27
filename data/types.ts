@@ -1,10 +1,10 @@
 // data/types.ts
 
 export interface TreeNode {
-  id?: string;
+  id: string; // now required — every node needs one for relatedTo + stable keys
   name: string;
   description?: string;
-  relatedTo?: string[]; // IDs of related cross-disciplinary fields
+  relatedTo?: string[]; // IDs of careers in other domains
   children?: TreeNode[];
-  value?: number; // Only leaf nodes should have a value
+  value?: number; // only leaf nodes
 }
