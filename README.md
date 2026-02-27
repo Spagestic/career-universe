@@ -71,6 +71,7 @@ career-universe/
 
 ## 🗺️ Future Roadmap
 
+```text
 Phase 1 — Foundation (current + next)
 ✅ Circle packing visualization
 ✅ Search (⌘K)
@@ -101,3 +102,4 @@ Phase 5 — Social
 → Personal bookmarks
 → Career journey sharing
 → Community voting
+```
