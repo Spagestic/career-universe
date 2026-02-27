@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useRef } from "react";
 import type { HierarchyCircularNode } from "d3-hierarchy";
 import type { TreeNode } from "@/data/careers";
 import { getDomainColor } from "@/lib/utils";
@@ -7,7 +8,10 @@ import { getDomainColor } from "@/lib/utils";
 interface CareerMapProps {
   root: HierarchyCircularNode<TreeNode>;
   focus: HierarchyCircularNode<TreeNode>;
-  setFocus: (node: HierarchyCircularNode<TreeNode>) => void;
+  // Updated signature to support React state callback: setFocus((prev) => ...)
+  setFocus: React.Dispatch<
+    React.SetStateAction<HierarchyCircularNode<TreeNode>>
+  >;
   size: number;
 }
 
@@ -17,16 +21,71 @@ export default function CareerMap({
   setFocus,
   size,
 }: CareerMapProps) {
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Track which node the user is currently hovering over for scroll-zooming
+  const hoveredRef = useRef<HierarchyCircularNode<TreeNode> | null>(null);
+  const wheelTimeout = useRef<NodeJS.Timeout | null>(null);
+
   // Zoom transform: center and scale the focused node to fill the view
   const k = size / (focus.r * 2);
   const tx = size / 2 - focus.x * k;
   const ty = size / 2 - focus.y * k;
 
+  // Set up the Mouse Wheel (Scroll) Event Listener
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault(); // Stop the whole page from scrolling
+
+      // Throttle the scroll events to allow the CSS transition to play smoothly
+      if (wheelTimeout.current) return;
+      wheelTimeout.current = setTimeout(() => {
+        wheelTimeout.current = null;
+      }, 350); // 350ms cooldown between zoom steps
+
+      if (e.deltaY > 0) {
+        // Scrolled DOWN -> Zoom OUT to parent
+        setFocus((prev) => prev.parent ?? prev);
+      } else if (e.deltaY < 0) {
+        // Scrolled UP -> Zoom IN to hovered child
+        const hovered = hoveredRef.current;
+        if (hovered) {
+          setFocus((prev) => {
+            // Find the ancestor of the hovered node that is a DIRECT child of the current focus
+            let target = hovered;
+            while (target && target.parent !== prev && target !== prev) {
+              target = target.parent as HierarchyCircularNode<TreeNode>;
+            }
+
+            // Only zoom in if it's a valid child and it has sub-children (ignore leaves)
+            if (
+              target &&
+              target !== prev &&
+              target.parent === prev &&
+              target.children
+            ) {
+              return target;
+            }
+            return prev;
+          });
+        }
+      }
+    };
+
+    // { passive: false } is required so e.preventDefault() works to stop page scrolling
+    svg.addEventListener("wheel", onWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", onWheel);
+  }, [setFocus]);
+
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${size} ${size}`}
       style={{ flex: 1, width: "100%", cursor: "pointer" }}
-      onClick={() => setFocus(focus.parent ?? root)}
+      onClick={() => setFocus((prev) => prev.parent ?? root)}
     >
       <style>{`
         .node-group:hover > circle {
@@ -47,12 +106,8 @@ export default function CareerMap({
           const depth = node.depth;
           const apparentR = node.r * k;
 
-          // NEW LOGIC: Only show labels if the node is an immediate child of our current focus.
-          // This entirely prevents hierarchical text overlap.
+          // Only show labels if the node is an immediate child of our current focus.
           const isChildOfFocus = node.parent === focus;
-
-          // We still want to prevent the browser from rendering microscopic text
-          // when zoomed out, to save performance.
           const shouldRenderText = apparentR > 10;
 
           // Font size in SVG coords (divided by k so apparent size stays constant)
@@ -60,7 +115,6 @@ export default function CareerMap({
             ? Math.min(node.r * 0.35, 12 / k)
             : Math.min(node.r * 0.25, 15 / k);
 
-          // Fill: transparent root, subtle fills for everything else
           const fillOpacity =
             depth === 0
               ? 0
@@ -72,10 +126,15 @@ export default function CareerMap({
             <g
               key={i}
               className="node-group"
+              // Keep track of exactly what the cursor is touching
+              onPointerMove={(e) => {
+                e.stopPropagation();
+                hoveredRef.current = node;
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 if (node === focus) {
-                  setFocus(node.parent ?? root);
+                  setFocus((prev) => prev.parent ?? root);
                 } else if (node.children) {
                   setFocus(node);
                 }
@@ -98,19 +157,20 @@ export default function CareerMap({
               {shouldRenderText && (
                 <text
                   x={node.x}
-                  y={isLeaf ? node.y : node.y - node.r + fontSize * 2}
+                  y={node.y} // CHANGED: All text uses exact center Y coordinate
                   textAnchor="middle"
-                  dominantBaseline={isLeaf ? "central" : "auto"}
+                  dominantBaseline="central" // CHANGED: Centers text vertically
                   fill="white"
                   fontSize={fontSize}
                   fontWeight={depth <= 1 ? 700 : isLeaf ? 400 : 600}
                   style={{
-                    // Instead of removing the text from the DOM, we change opacity.
-                    // This allows the text to fade in and out smoothly as you zoom!
                     opacity: isChildOfFocus ? 0.9 : 0,
                     transition: "opacity 0.4s ease-in-out",
                     pointerEvents: "none",
                     fontFamily: "inherit",
+                    // ADDED: Text shadow ensures readability when overlapping inner circles
+                    textShadow:
+                      "0px 1px 4px rgba(0,0,0,0.8), 0px 0px 8px rgba(0,0,0,0.4)",
                   }}
                 >
                   {node.data.name}
