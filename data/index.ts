@@ -10,7 +10,7 @@ import { healthcareDomain } from "./domains/healthcare";
 
 export const careerData: TreeNode = {
   id: "root",
-  name: "Career Universe",
+  name: "",
   children: [
     scienceDomain,
     engineeringDomain,
