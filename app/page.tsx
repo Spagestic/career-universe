@@ -5,11 +5,11 @@ import { useMemo, useState } from "react";
 import { hierarchy, pack } from "d3-hierarchy";
 import { careerData, type TreeNode } from "@/data/careers";
 import CareerMap from "@/components/CareerMap";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const SIZE = 928;
 
 export default function Page() {
-  // Compute circle packing layout once
   const root = useMemo(() => {
     const r = hierarchy(careerData)
       .sum((d) => d.value ?? 0)
@@ -23,18 +23,11 @@ export default function Page() {
   const [focus, setFocus] = useState(root);
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        background: "#0f0f1a",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        fontFamily: "system-ui, sans-serif",
-      }}
-    >
-
+    // Replaced hardcoded inline styles with Tailwind theme variables
+    <div className="w-full h-screen flex flex-col overflow-hidden bg-background text-foreground font-sans">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       <CareerMap root={root} focus={focus} setFocus={setFocus} size={SIZE} />
     </div>
   );

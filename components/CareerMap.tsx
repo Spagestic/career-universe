@@ -1,14 +1,13 @@
+// components/CareerMap.tsx
 "use client";
 
 import React, { useEffect, useRef } from "react";
 import type { HierarchyCircularNode } from "d3-hierarchy";
 import type { TreeNode } from "@/data/careers";
-import { getDomainColor } from "@/lib/utils";
 
 interface CareerMapProps {
   root: HierarchyCircularNode<TreeNode>;
   focus: HierarchyCircularNode<TreeNode>;
-  // Updated signature to support React state callback: setFocus((prev) => ...)
   setFocus: React.Dispatch<
     React.SetStateAction<HierarchyCircularNode<TreeNode>>
   >;
@@ -22,45 +21,34 @@ export default function CareerMap({
   size,
 }: CareerMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-
-  // Track which node the user is currently hovering over for scroll-zooming
   const hoveredRef = useRef<HierarchyCircularNode<TreeNode> | null>(null);
   const wheelTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Zoom transform: center and scale the focused node to fill the view
   const k = size / (focus.r * 2);
   const tx = size / 2 - focus.x * k;
   const ty = size / 2 - focus.y * k;
 
-  // Set up the Mouse Wheel (Scroll) Event Listener
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
     const onWheel = (e: WheelEvent) => {
-      e.preventDefault(); // Stop the whole page from scrolling
-
-      // Throttle the scroll events to allow the CSS transition to play smoothly
+      e.preventDefault();
       if (wheelTimeout.current) return;
       wheelTimeout.current = setTimeout(() => {
         wheelTimeout.current = null;
-      }, 350); // 350ms cooldown between zoom steps
+      }, 350);
 
       if (e.deltaY > 0) {
-        // Scrolled DOWN -> Zoom OUT to parent
         setFocus((prev) => prev.parent ?? prev);
       } else if (e.deltaY < 0) {
-        // Scrolled UP -> Zoom IN to hovered child
         const hovered = hoveredRef.current;
         if (hovered) {
           setFocus((prev) => {
-            // Find the ancestor of the hovered node that is a DIRECT child of the current focus
             let target = hovered;
             while (target && target.parent !== prev && target !== prev) {
               target = target.parent as HierarchyCircularNode<TreeNode>;
             }
-
-            // Only zoom in if it's a valid child and it has sub-children (ignore leaves)
             if (
               target &&
               target !== prev &&
@@ -75,7 +63,6 @@ export default function CareerMap({
       }
     };
 
-    // { passive: false } is required so e.preventDefault() works to stop page scrolling
     svg.addEventListener("wheel", onWheel, { passive: false });
     return () => svg.removeEventListener("wheel", onWheel);
   }, [setFocus]);
@@ -88,8 +75,13 @@ export default function CareerMap({
       onClick={() => setFocus((prev) => prev.parent ?? root)}
     >
       <style>{`
+        /* 
+         Hover effect: Instead of 'brightness' (which acts weird between light/dark),
+         we dynamically increase opacity variables defined in the inline styles below 
+        */
         .node-group:hover > circle {
-          filter: brightness(1.3);
+          fill-opacity: var(--hover-fill) !important;
+          stroke-opacity: var(--hover-stroke) !important;
         }
       `}</style>
 
@@ -101,16 +93,13 @@ export default function CareerMap({
         }}
       >
         {root.descendants().map((node, i) => {
-          const color = getDomainColor(node);
           const isLeaf = !node.children;
           const depth = node.depth;
           const apparentR = node.r * k;
 
-          // Only show labels if the node is an immediate child of our current focus.
           const isChildOfFocus = node.parent === focus;
           const shouldRenderText = apparentR > 10;
 
-          // Font size in SVG coords (divided by k so apparent size stays constant)
           const fontSize = isLeaf
             ? Math.min(node.r * 0.35, 12 / k)
             : Math.min(node.r * 0.25, 15 / k);
@@ -119,14 +108,14 @@ export default function CareerMap({
             depth === 0
               ? 0
               : isLeaf
-                ? 0.25
-                : ([0, 0.06, 0.08, 0.12, 0.15][depth] ?? 0.1);
+                ? 0.08
+                : ([0, 0.02, 0.04, 0.06, 0.08][depth] ?? 0.05);
+          const strokeOpacity = depth === 0 ? 0 : 0.15;
 
           return (
             <g
               key={i}
               className="node-group"
-              // Keep track of exactly what the cursor is touching
               onPointerMove={(e) => {
                 e.stopPropagation();
                 hoveredRef.current = node;
@@ -145,32 +134,34 @@ export default function CareerMap({
                 cx={node.x}
                 cy={node.y}
                 r={node.r}
-                fill={`${color}${Math.round(fillOpacity * 255)
-                  .toString(16)
-                  .padStart(2, "0")}`}
-                stroke={depth === 0 ? "none" : color}
+                fill="var(--foreground)"
+                stroke="var(--foreground)"
                 strokeWidth={Math.max(0.5, (2.5 - depth * 0.4) / k)}
-                strokeOpacity={depth === 0 ? 0 : 0.5}
-                style={{ transition: "filter 0.2s" }}
+                style={
+                  {
+                    fillOpacity: fillOpacity,
+                    strokeOpacity: strokeOpacity,
+                    transition: "all 0.2s ease-in-out",
+                    "--hover-fill": fillOpacity + 0.04,
+                    "--hover-stroke": strokeOpacity + 0.3,
+                  } as React.CSSProperties
+                }
               />
 
               {shouldRenderText && (
                 <text
                   x={node.x}
-                  y={node.y} // CHANGED: All text uses exact center Y coordinate
+                  y={node.y}
                   textAnchor="middle"
-                  dominantBaseline="central" // CHANGED: Centers text vertically
-                  fill="white"
+                  dominantBaseline="central"
+                  fill="var(--foreground)"
                   fontSize={fontSize}
                   fontWeight={depth <= 1 ? 700 : isLeaf ? 400 : 600}
                   style={{
-                    opacity: isChildOfFocus ? 0.9 : 0,
+                    opacity: isChildOfFocus ? 1 : 0,
                     transition: "opacity 0.4s ease-in-out",
                     pointerEvents: "none",
                     fontFamily: "inherit",
-                    // ADDED: Text shadow ensures readability when overlapping inner circles
-                    textShadow:
-                      "0px 1px 4px rgba(0,0,0,0.8), 0px 0px 8px rgba(0,0,0,0.4)",
                   }}
                 >
                   {node.data.name}
