@@ -71,8 +71,18 @@ function MapCanvas({
             }}
             onClick={(e) => {
               e.stopPropagation();
-              if (node === focus) zoomOut();
-              else if (node.children) setFocus(node);
+              if (node === focus) {
+                zoomOut();
+              } else {
+                // Walk up to find the direct child of focus on the path to the clicked node
+                let n = node;
+                while (n.parent && n.parent !== focus) {
+                  n = n.parent;
+                }
+                if (n.parent === focus) {
+                  setFocus(n);
+                }
+              }
             }}
           />
         ))}
