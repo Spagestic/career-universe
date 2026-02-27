@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { hierarchy, pack } from "d3-hierarchy";
-import { careerData, type TreeNode } from "@/data/careers";
+import { careerData, type TreeNode } from "@/data";
 import CareerMap from "@/components/CareerMap";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 

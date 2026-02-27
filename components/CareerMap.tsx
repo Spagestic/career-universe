@@ -3,7 +3,7 @@
 
 import React, { useEffect, useRef } from "react";
 import type { HierarchyCircularNode } from "d3-hierarchy";
-import type { TreeNode } from "@/data/careers";
+import { type TreeNode } from "@/data";
 
 interface CareerMapProps {
   root: HierarchyCircularNode<TreeNode>;
