@@ -23,7 +23,7 @@ First, ensure you have [Bun](https://bun.sh/) installed on your machine.
 1. **Clone the repository** (or navigate to your project folder):
 
 ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Spagestic/career-universe
    cd career-universe
 ```
 
