@@ -4,8 +4,6 @@
 import { useMemo, useState } from "react";
 import { hierarchy, pack } from "d3-hierarchy";
 import { careerData, type TreeNode } from "@/data/careers";
-
-import Breadcrumb from "@/components/Breadcrumb";
 import CareerMap from "@/components/CareerMap";
 
 const SIZE = 928;
@@ -36,7 +34,6 @@ export default function Page() {
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      <Breadcrumb focus={focus} setFocus={setFocus} />
 
       <CareerMap root={root} focus={focus} setFocus={setFocus} size={SIZE} />
     </div>
