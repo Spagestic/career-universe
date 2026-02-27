@@ -31,8 +31,8 @@ function NodeGroup({
   const isChildOfFocus = node.parent === focus;
   const showLabel = apparentR > LABEL_RADIUS_PX && isChildOfFocus;
 
-  const fillOpacity = isLeaf ? 0.08 : Math.min(depth * 0.02, 0.08);
-  const strokeOpacity = 0.15;
+  const fillOpacity = isLeaf ? 0.04 : Math.min(depth * 0.01, 0.04);
+  const strokeOpacity = 0.06;
 
   return (
     <g
