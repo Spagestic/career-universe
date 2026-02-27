@@ -1,4 +1,6 @@
-# Career Universe 🌌
+# Career Universe
+
+[![Career Universe](/public/image.png)](https://career-universe.vercel.app/)
 
 An interactive, zoomable map of career pathways. Career Universe visualizes domains, fields, and specific jobs using D3.js circle packing, helping users explore cross-disciplinary career paths in an intuitive, hierarchical landscape.
 
