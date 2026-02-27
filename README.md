@@ -71,6 +71,33 @@ career-universe/
 
 ## 🗺️ Future Roadmap
 
-- **Graph Edges**: Implement a side inspector panel to reveal cross-disciplinary links (e.g., showing how "Bioinformatics" bridges Biology and Computer Science).
-- **Career Details**: Add salary data, required degrees, and descriptions to the tsleaf nodes.
-- **Search Functionality**: Add a command palette to quickly locate and zoom to specific careers.
+Phase 1 — Foundation (current + next)
+✅ Circle packing visualization
+✅ Search (⌘K)
+→ Cross-domain connections
+→ Shareable deep links (?focus=...)
+→ Career detail panel (static data)
+
+Phase 2 — Database Migration
+→ PostgreSQL schema + Drizzle
+→ Seed script (current JSON → DB)
+→ buildTreeFromDB() server function
+→ ISR / on-demand revalidation
+
+Phase 3 — User Contributions
+→ Contribution dialog
+→ LLM validation pipeline
+→ Proposal status tracking
+→ Basic moderation dashboard (/admin)
+
+Phase 4 — Intelligence
+→ BLS / O\*NET salary + growth data
+→ Heatmap mode
+→ Path finder (A → B)
+→ AI career advisor chat
+
+Phase 5 — Social
+→ Auth (NextAuth / Clerk)
+→ Personal bookmarks
+→ Career journey sharing
+→ Community voting
