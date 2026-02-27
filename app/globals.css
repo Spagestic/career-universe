@@ -126,7 +126,126 @@
   }
 }
 
-::view-transition-old(root), ::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ── Career Map ─────────────────────────────────────────────── */
+
+.career-map {
+  flex: 1;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.career-map:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.career-map__canvas {
+  transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* Cursor for zoomable groups */
+.node-group[data-has-children] {
+  cursor: pointer;
+}
+
+/* Smooth hover transitions on circles */
+.node-circle {
+  transition:
+    fill-opacity 0.15s ease,
+    stroke-opacity 0.15s ease;
+}
+
+/*
+  Hover bump via calc().  --fo / --so are only set for depth > 0,
+  so when they're absent the declaration is invalid and the
+  root circle stays unchanged.
+*/
+.node-group:hover > .node-circle {
+  fill-opacity: calc(var(--fo) + 0.06);
+  stroke-opacity: calc(var(--so) + 0.25);
+}
+
+/* Labels: mount = fade-in; unmount = instant (zoom covers it) */
+.node-label {
+  pointer-events: none;
+  font-family: inherit;
+  animation: nodeLabel-in 0.35s ease-out;
+}
+
+@keyframes nodeLabel-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+} /* ── Career Map ─────────────────────────────────────────────── */
+
+.career-map {
+  flex: 1;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.career-map:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.career-map__canvas {
+  transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* Cursor for zoomable groups */
+.node-group[data-has-children] {
+  cursor: pointer;
+}
+
+/* Smooth hover transitions on circles */
+.node-circle {
+  transition:
+    fill-opacity 0.15s ease,
+    stroke-opacity 0.15s ease;
+}
+
+/*
+  Hover bump via calc().  --fo / --so are only set for depth > 0,
+  so when they're absent the declaration is invalid and the
+  root circle stays unchanged.
+*/
+.node-group:hover > .node-circle {
+  fill-opacity: calc(var(--fo) + 0.06);
+  stroke-opacity: calc(var(--so) + 0.25);
+}
+
+/* Labels: mount = fade-in; unmount = instant (zoom covers it) */
+.node-label {
+  pointer-events: none;
+  font-family: inherit;
+  animation: nodeLabel-in 0.35s ease-out;
+}
+
+@keyframes nodeLabel-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
