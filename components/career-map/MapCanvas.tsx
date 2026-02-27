@@ -74,12 +74,13 @@ function MapCanvas({
               if (node === focus) {
                 zoomOut();
               } else {
-                // Walk up to find the direct child of focus on the path to the clicked node
+                // Walk up to find the nearest ancestor with children that is a direct child of focus
                 let n = node;
                 while (n.parent && n.parent !== focus) {
                   n = n.parent;
                 }
-                if (n.parent === focus) {
+                // Only focus if n is not a leaf and is a direct child of focus
+                if (n.parent === focus && n.children) {
                   setFocus(n);
                 }
               }
