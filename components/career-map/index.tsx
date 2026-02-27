@@ -65,7 +65,12 @@ function CareerMap({ root, focus, setFocus, size }: CareerMapProps) {
   // ── Search select ─────────────────────────────────────────────────────────
   const handleSelect = useCallback(
     (node: HierarchyCircularNode<TreeNode>) => {
-      setFocus(node);
+      // If node is a leaf, walk up to the nearest ancestor with children
+      let n = node;
+      while (n && !n.children && n.parent) {
+        n = n.parent;
+      }
+      setFocus(n);
       setSearchOpen(false);
     },
     [setFocus],
