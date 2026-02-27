@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import { hierarchy, pack } from "d3-hierarchy";
 import { careerData, type TreeNode } from "@/data";
-import CareerMap from "@/components/CareerMap";
+import CareerMap from "@/components/career-map";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const SIZE = 928;
