@@ -1,4 +1,3 @@
-// components/CareerMap.tsx
 "use client";
 
 import type { HierarchyCircularNode } from "d3-hierarchy";
@@ -31,7 +30,7 @@ export default function CareerMap({
     >
       <style>{`
         .node-group:hover > circle {
-          filter: brightness(1.4);
+          filter: brightness(1.3);
         }
       `}</style>
 
@@ -48,8 +47,13 @@ export default function CareerMap({
           const depth = node.depth;
           const apparentR = node.r * k;
 
-          // Label visibility — only render if circle is big enough on screen
-          const showLabel = apparentR > (isLeaf ? 25 : 45);
+          // NEW LOGIC: Only show labels if the node is an immediate child of our current focus.
+          // This entirely prevents hierarchical text overlap.
+          const isChildOfFocus = node.parent === focus;
+
+          // We still want to prevent the browser from rendering microscopic text
+          // when zoomed out, to save performance.
+          const shouldRenderText = apparentR > 10;
 
           // Font size in SVG coords (divided by k so apparent size stays constant)
           const fontSize = isLeaf
@@ -91,7 +95,7 @@ export default function CareerMap({
                 style={{ transition: "filter 0.2s" }}
               />
 
-              {showLabel && (
+              {shouldRenderText && (
                 <text
                   x={node.x}
                   y={isLeaf ? node.y : node.y - node.r + fontSize * 2}
@@ -100,8 +104,14 @@ export default function CareerMap({
                   fill="white"
                   fontSize={fontSize}
                   fontWeight={depth <= 1 ? 700 : isLeaf ? 400 : 600}
-                  opacity={0.9}
-                  style={{ pointerEvents: "none", fontFamily: "inherit" }}
+                  style={{
+                    // Instead of removing the text from the DOM, we change opacity.
+                    // This allows the text to fade in and out smoothly as you zoom!
+                    opacity: isChildOfFocus ? 0.9 : 0,
+                    transition: "opacity 0.4s ease-in-out",
+                    pointerEvents: "none",
+                    fontFamily: "inherit",
+                  }}
                 >
                   {node.data.name}
                 </text>
